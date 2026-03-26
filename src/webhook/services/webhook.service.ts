@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { WebhookPublisherService } from './webhook-publisher.service';
 import { mapMetaMessageToCanonicalEvent } from '../mappers/meta-webhook.mapper';
+import { mapMetaStatusToCanonicalEvent } from '../mappers/meta-status-webhook.mapper';
 
 @Injectable()
 export class WebhookService {
@@ -21,6 +22,7 @@ export class WebhookService {
         const metadata = value?.metadata;
         const contacts = value?.contacts ?? [];
         const messages = value?.messages ?? [];
+        const statuses = value?.statuses ?? [];
 
         for (let i = 0; i < messages.length; i++) {
           const message = messages[i];
@@ -37,6 +39,21 @@ export class WebhookService {
           );
 
           await this.webhookPublisherService.publishWhatsappMessageReceived(
+            event,
+          );
+        }
+
+        for (const status of statuses) {
+          const event = mapMetaStatusToCanonicalEvent({
+            status,
+            metadata,
+          });
+
+          this.logger.log(
+            `Publicando evento ${event.eventType} para messageId=${event.message.messageId} status=${event.message.status}`,
+          );
+
+          await this.webhookPublisherService.publishWhatsappMessageStatus(
             event,
           );
         }
