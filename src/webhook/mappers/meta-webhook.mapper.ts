@@ -49,7 +49,7 @@ export function mapMetaMessageToCanonicalEvent(params: {
     messageType,
   );
 
-  const mediaPayload = isMedia ? message?.[messageType] ?? null : null;
+  const mediaPayload = isMedia ? (message?.[messageType] ?? null) : null;
 
   return {
     eventId: randomUUID(),
